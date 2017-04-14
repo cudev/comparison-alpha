@@ -1,0 +1,36 @@
+stages:
+- build
+- test
+
+variables:
+  CONTAINER_TEST_IMAGE: $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_NAME
+  CONTAINER_RELEASE_IMAGE: $CI_REGISTRY_IMAGE:$CI_COMMIT_SHA
+
+before_script:
+  - docker login -u gitlab-ci-token -p $CI_JOB_TOKEN $CI_REGISTRY
+
+build:
+  stage: build
+  script:
+    - docker build --pull -t $CONTAINER_TEST_IMAGE .
+    - docker push $CONTAINER_TEST_IMAGE
+
+lint:
+  stage: test
+  script:
+    - docker pull $CONTAINER_TEST_IMAGE
+    - docker run $CONTAINER_TEST_IMAGE bash -c "cd /srv/app && yarn run lint"
+
+flow:
+  stage: test
+  script:
+    - docker pull $CONTAINER_TEST_IMAGE
+    - docker run $CONTAINER_TEST_IMAGE bash -c "cd /srv/app && yarn run flow"
+
+test:
+  stage: test
+  script:
+    - export CONTAINER_CURRENT_IMAGE=$CONTAINER_TEST_IMAGE
+    - export COMPOSE_HTTP_TIMEOUT=200
+    - docker-compose run web bash -c "cd /srv/app && yarn test"
+
