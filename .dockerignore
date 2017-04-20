@@ -1,0 +1,5 @@
+docker-compose.*
+Dockerfile
+node_modules/*
+.gitlab-ci.yml
+bin/*

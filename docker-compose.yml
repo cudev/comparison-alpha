@@ -1,0 +1,15 @@
+version: "2"
+services:
+  web:
+    image: "${CONTAINER_CURRENT_IMAGE}"
+    environment:
+      - VIRTUAL_HOST=comparison-alfa.cudev.org
+    network_mode: bridge
+    links:
+      - mongo
+    container_name: comparisons_alfa_app
+    ports:
+      - 3000:3000 # port must be the same as host's due to isomorphic data fetching
+  mongo:
+    network_mode: bridge
+    image: mongo:latest
